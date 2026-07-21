@@ -5,10 +5,13 @@ import os
 import csv
 import matplotlib.pyplot as plt
 import time
+import json, os
 from pydrive2.auth import ServiceAccountCredentials
 from pydrive2.drive import GoogleDrive
 
-gauth = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", ["https://www.googleapis.com/auth/drive"])
+creds_json = os.getenv("GOOGLE_SERVICE_ACCOUNT")
+creds_dict = json.loads(creds_json)
+gauth = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, ["https://www.googleapis.com/auth/drive"])
 drive = GoogleDrive(gauth)
 
 # Ensure files exist with proper headers
