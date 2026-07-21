@@ -100,35 +100,68 @@ if st.session_state["logged_in"]:
         note = st.text_input("Note (Optional)")
 
         if st.button("Submit Expense"):
-            with open ("expenses.csv", "a", newline="") as file:
-                fieldnames = ["Amount", "Category", "Note", "Date"]
-                writer = csv.DictWriter(file, fieldnames=fieldnames)
+            if os.path.exists("expenses.csv"):
+                with open ("expenses.csv", "a", newline="") as file:
+                    fieldnames = ["Amount", "Category", "Note", "Date"]
+                    writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-                if file.tell() == 0:
-                    writer.writeheader()
-                writer.writerow({"Amount": amount, "Category": category, 'Note': note, 'Date':  datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")} )
+                    if file.tell() == 0:
+                        writer.writeheader()
+                    writer.writerow({"Amount": amount, "Category": category, 'Note': note, 'Date':  datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")} )
+            else:
+                with open ("sample_expenses.csv", "a", newline="") as file:
+                    fieldnames = ["Amount", "Category", "Note", "Date"]
+                    writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-            with open ("budget.csv", "r") as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if row:
-                        if float(row[0]) < amount:
-                            print("You are out of the budget. Add money in the")
-                        old_amount = float(row[0])
-                        new = old_amount - amount
-                        row[0]= str(new)
-                    rows.append(row)
+                    if file.tell() == 0:
+                        writer.writeheader()
+                    writer.writerow({"Amount": amount, "Category": category, 'Note': note, 'Date':  datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")} )
+            if os.path.exists("budget.csv"):
+                with open ("budget.csv", "r") as file:
+                    reader = csv.reader(file)
+                    for row in reader:
+                        if row:
+                            if float(row[0]) < amount:
+                                print("You are out of the budget. Add money in the")
+                            old_amount = float(row[0])
+                            new = old_amount - amount
+                            row[0]= str(new)
+                        rows.append(row)
+            else:
+                with open ("sample_budget.csv", "r") as file:
+                    reader = csv.reader(file)
+                    for row in reader:
+                        if row:
+                            if float(row[0]) < amount:
+                                print("You are out of the budget. Add money in the")
+                            old_amount = float(row[0])
+                            new = old_amount - amount
+                            row[0]= str(new)
+                        rows.append(row)
+            if os.path.exists("budget.csv"):
+                with open("budget.csv", "w", newline="") as file:
 
-            with open("budget.csv", "w", newline="") as file:
+                    writer = csv.writer(file)
+                    writer.writerows(rows)
+                st.success(f"Successfully added ₹{amount} to {category}!")
+            else:
+                with open("sample_budget.csv", "w", newline="") as file:
 
-                writer = csv.writer(file)
-                writer.writerows(rows)
-            st.success(f"Successfully added ₹{amount} to {category}!")
+                    writer = csv.writer(file)
+                    writer.writerows(rows)
+                st.success(f"Successfully added ₹{amount} to {category}!")
+
     elif choice == 'View Budget':
         st.subheader("See your budget")
-        df = pd.read_csv("budget.csv", header=None) #file with no header
-        budget = df.iloc[:, 0].sum() 
-        st.metric(label="Total Budget", value=f'₹{float(budget)}')
+        if os.path.exists("budget.csv"):
+            df = pd.read_csv("budget.csv", header=None) #file with no header
+            budget = df.iloc[:, 0].sum() 
+            st.metric(label="Total Budget", value=f'₹{float(budget)}')
+        else:
+            df = pd.read_csv("sample_budget.csv", header=None) #file with no header
+            budget = df.iloc[:, 0].sum() 
+            st.metric(label="Total Budget", value=f'₹{float(budget)}')
+
     elif choice == 'Add Money to Budget':
         st.subheader("Budget Entries")
         df2 = pd.read_csv("budgetentry.csv")
@@ -140,28 +173,56 @@ if st.session_state["logged_in"]:
         amount =st.number_input("Enter amount", min_value = 0.0, step = 10.0)
         if st.button("Add amount"):
             rows = []
-            with open ("budget.csv", "r") as file:
-                reader = csv.reader(file)
-                for row in reader:
-                    if row:
-                        old_amount = float(row[0])
-                        new = old_amount + amount
-                        row[0] = str(new)
-                    rows.append(row)
+            if os.path.exists("budgetentry.csv"):
+                with open ("budget.csv", "r") as file:
+                    reader = csv.reader(file)
+                    for row in reader:
+                        if row:
+                            old_amount = float(row[0])
+                            new = old_amount + amount
+                            row[0] = str(new)
+                        rows.append(row)
+            else:
+                with open ("budget.csv", "r") as file:
+                    reader = csv.reader(file)
+                    for row in reader:
+                        if row:
+                            old_amount = float(row[0])
+                            new = old_amount + amount
+                            row[0] = str(new)
+                        rows.append(row)
+
+
             if not rows:
                 rows = [[str(amount)]]
-            with open ("budget.csv", "w", newline ="") as file:
-                writer = csv.writer(file)
-                writer.writerows(rows)
-            with open("budgetentry.csv", "a" , newline="")as file:
-                writer = csv.DictWriter(file, fieldnames=["Amount", "Date"])
-                if file.tell() == 0:
-                    writer.writeheader()
-                writer.writerow({'Amount':amount, 'Date': datetime.datetime.now().strftime  ("%Y-%m-%d %H:%M:%S")})
-            st.success(f'Successfully added ₹{amount} to your budget!')
+            if os.path.exists("budget.csv"):
 
-            st.subheader("Budget Entries")
-           
+                with open ("budget.csv", "w", newline ="") as file:
+                    writer = csv.writer(file)
+                    writer.writerows(rows)
+            else:
+                with open ("sample_budget.csv", "w", newline ="") as file:
+                    writer = csv.writer(file)
+                    writer.writerows(rows)
+            if os.path.exists("budgetentry.csv"):
+                with open("budgetentry.csv", "a" , newline="")as file:
+                    writer = csv.DictWriter(file, fieldnames=["Amount", "Date"])
+                    if file.tell() == 0:
+                        writer.writeheader()
+                    writer.writerow({'Amount':amount, 'Date': datetime.datetime.now().strftime  ("%Y-%m-%d %H:%M:%S")})
+                st.success(f'Successfully added ₹{amount} to your budget!')
+
+                st.subheader("Budget Entries")
+            else:
+                with open("sample_budgetentry.csv", "a" , newline="")as file:
+                    writer = csv.DictWriter(file, fieldnames=["Amount", "Date"])
+                    if file.tell() == 0:
+                        writer.writeheader()
+                    writer.writerow({'Amount':amount, 'Date': datetime.datetime.now().strftime  ("%Y-%m-%d %H:%M:%S")})
+                st.success(f'Successfully added ₹{amount} to your budget!')
+
+                st.subheader("Budget Entries")
+            
     elif choice == ("See Budget Entries"):
         st.subheader("Budget Entries")
         if os.path.exists("budgetentry.csv"):
@@ -171,7 +232,11 @@ if st.session_state["logged_in"]:
             else:
                 st.info("No budget entries recorded yet!")
         else:
-            st.info("No budget entries' file found yet!")
+            df2 = pd.read_csv("sample_budgetentry.csv")
+            if not df2.empty:
+                st.dataframe(df2)
+            else:
+                st.info("No budget entries recorded yet!")
     if st.sidebar.button("Logout"):
         st.session_state["logged_in"] = False
         st.rerun()           
