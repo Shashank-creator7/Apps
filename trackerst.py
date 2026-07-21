@@ -242,6 +242,7 @@ if st.session_state["logged_in"]:
         st.rerun()           
 
 if choice == "Signup":
+    
     st.subheader("Signup")
     username = st.text_input("Enter username :" )
     if len(username)>0:
