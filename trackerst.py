@@ -15,6 +15,8 @@ if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 if "switched" not in st.session_state:
     st.session_state["switched"] = False
+if "show_budget" not in st.session_state:
+    st.session_state.show_budget = False
 menu = ["Login", "Signup"]
 # ==========================================
 
@@ -59,7 +61,10 @@ if choice == "Login":
 # With valid credintials --> Login 
 # --------------------------------------------------------------------------------------------
 if st.session_state["logged_in"]:
-    st.title("💰 Personal Expense Tracker")
+    st.markdown(
+        "<h3 style='font-family:lato ; color:#4dd0e1; font-size:40px;'>💰 Personal Expense Tracker</h3>",
+        unsafe_allow_html=True)
+    # st.title("💰 Personal Expense Tracker")
 
     # Sidebar for Navigation
 #---------------------------------------------------------------------------------------------
@@ -69,7 +74,11 @@ if st.session_state["logged_in"]:
 
 #   ============================ Choices for user ====================================
     if choice == "View Expenses":
-        st.subheader("Your Expenses")
+        st.markdown(
+    "<h3 style='font-family:Arial; color:#4dd0e1; font-size:30px;'>Your Expences</h3>",
+    unsafe_allow_html=True)
+
+        # st.subheader("Your Expenses")
         expenses_df = pd.read_csv("expenses.csv")
 
         if not expenses_df.empty:
@@ -86,19 +95,17 @@ if st.session_state["logged_in"]:
             # Create a container with vertical spacing
             with st.container():
                 st.write("----------------------------")   # vertical gap
-                # st.write("")   # more gap
-                if st.button("View Budget"):
-                    if os.path.exists("budget.csv"):
-
-                        budget_df = pd.read_csv("budget.csv", header=None)
-                        budget = budget_df.iloc[:, 0].sum()
-                        st.metric(label="Total Budget", value=f'₹{float(budget)}')
-                    else:
-                        budget_df = pd.read_csv("sample_budget.csv", header=None)
-                        budget = budget_df.iloc[:, 0].sum()
-                        st.metric(label="Total Budget", value=f'₹{float(budget)}')
+                # st.write("") --> more gap
+                #toogle button
+                if st.button("Hide Budget" if st.session_state.show_budget else "View Budget"):
+                    st.session_state.show_budget = not st.session_state.show_budget
+                    st.rerun()
+                #show budget if it is true
+                if st.session_state.show_budget:
+                    budget_df = pd.read_csv("budget.csv", header=None)
+                    budget = budget_df.iloc[:, 0].sum()
+                    st.metric(label="Total Budget", value=f'₹{float(budget)}')
                         
-
         # col1, col2 = st.columns([2,1])
         with st.container():
             with col2:  # left column ---->(change to col1 for left alignment)
@@ -119,7 +126,7 @@ if st.session_state["logged_in"]:
         amount = st.number_input("Enter Amount", min_value=0.0, step=10.0)
         category = st.selectbox("Category", ["Food", "Travel", "Self-Care", "Bills", "Other"])
         note = st.text_input("Note (Optional)")
-        date = st.date_input("Date")
+        date = st.datetime_input("Date", datetime.datetime.now())
 
 
         if st.button("Submit Expense"):
@@ -127,10 +134,10 @@ if st.session_state["logged_in"]:
                 with open ("expenses.csv", "a", newline="") as file:
                     fieldnames = ["Amount", "Category", "Note", "Date"]
                     writer = csv.DictWriter(file, fieldnames=fieldnames)
-
+                    
                     if file.tell() == 0:
                         writer.writeheader()
-                    writer.writerow({"Amount": amount, "Category": category, 'Note': note, 'Date':  datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")} )
+                    writer.writerow({"Amount": amount, "Category": category, 'Note': note, 'Date':date} )
             else:
                 with open ("sample_expenses.csv", "a", newline="") as file:
                     fieldnames = ["Amount", "Category", "Note", "Date"]
@@ -186,7 +193,7 @@ if st.session_state["logged_in"]:
             st.metric(label="Total Budget", value=f'₹{float(budget)}')
 
     elif choice == 'Add Money to Budget':
-        # st.subheader("Budget Entries")
+        st.subheader("Budget Entries")
         df2 = pd.read_csv("budgetentry.csv")
         if not df2.empty:
             st.dataframe(df2)
@@ -194,6 +201,7 @@ if st.session_state["logged_in"]:
             st.info("No budget entries recorded yet!")
         # st.subheader("Add Money to Budget")
         amount =st.number_input("Enter amount", min_value = 0.0, step = 10.0)
+        date = st.datetime_input("Date", datetime.datetime.now())
         if st.button("Add amount"):
             rows = []
             if os.path.exists("budgetentry.csv"):
