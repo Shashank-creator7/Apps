@@ -26,7 +26,7 @@ if choice == "Toss The Coin":
 
 if choice == "Roll The Dice":
     st.markdown(
-            "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>🪙 Roll The Dice</b> </h3>",
+            "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>🎲 Roll The Dice</b> </h3>",
             unsafe_allow_html=True)
     if st.button("Roll"):
         placeholder = st.empty()
@@ -34,7 +34,7 @@ if choice == "Roll The Dice":
             result = random.randint(1, 6)
             placeholder.markdown(f'## 🎲 {result}')
             time.sleep(0.1)
-        st.success(f'Final Result: 🪙 {result}')
+        st.success(f'Final Result: 🎲 {result}')
         countdown = st.empty()
         for i in range(5, 0, -1):
             countdown.warning(f'Restarting in {i} seconds')
