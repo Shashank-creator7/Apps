@@ -2,7 +2,9 @@ import random
 import streamlit as st
 import time
 
-st.title("🪙 TOSS THE COIN ")
+st.markdown(
+        "<h3 style='font-family:lato ; color:#4dd0e1; font-size:35px;'>💰 Personal Expense Tracker</h3>",
+        unsafe_allow_html=True)
 
 if st.button("Toss"):
     placeholder = st.empty()
