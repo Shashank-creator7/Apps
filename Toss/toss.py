@@ -1,7 +1,9 @@
 import random
 import streamlit as st
 import time
-choice = st.sidebar.selectbox("Menu",menu=["Toss The Coin", "Roll The Dice"])
+menu = ["Toss The Coin", "Roll The Dice"]
+
+choice = st.sidebar.selectbox("Menu",menu)
 if choice == "Toss The Coin":
     st.markdown(
         "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>🪙 TOSS THE COIN</b> </h3>",
