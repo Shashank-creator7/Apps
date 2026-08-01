@@ -13,7 +13,7 @@ if st.button("Toss"):
         placeholder.markdown(f'## 🪙 {result}') 
         time.sleep(0.1)
 
-    # st.success(f'Final Result: 🪙 {result}')
+    st.success(f'Final Result: 🪙 {result}')
     countdown = st.empty()
     for i in range(5, 0, -1):
         countdown.warning(f'Restarting in {i} seconds')
