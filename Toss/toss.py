@@ -3,7 +3,7 @@ import streamlit as st
 import time
 
 st.markdown(
-        "<h3 style='font-family:Tahoma; color:#4dd0e1; font-size:px;'>🪙 TOSS THE COIN </h3>",
+        "<h3 style='font-family:Tahoma; color:#4dd0e1; font-size:px;'>🪙 TOSS THE COIN</b> </h3>",
         unsafe_allow_html=True)
 
 if st.button("Toss"):
