@@ -1,6 +1,7 @@
 # -----------------------------
 # import all libraries
-
+from cryptography.fernet import Fernet
+import io
 import streamlit as st
 import pandas as pd
 import datetime
@@ -12,6 +13,30 @@ import altair as alt
 
 # ------------------------------
 
+# Generate a key once and save it securely (e.g. in a .env file)
+key = Fernet.generate_key()
+cipher = Fernet(key)
+
+def save_csv_encrypted(df, filename):
+    raw = df.to_csv(index=False).encode()
+    encrypted = cipher.encrypt(raw)
+    with open(filename, "wb") as f:
+        f.write(encrypted)
+
+def load_csv_encrypted(filename):
+    with open(filename, "rb") as f:
+        encrypted = f.read()
+    decrypted = cipher.decrypt(encrypted).decode()
+    return pd.read_csv(io.StringIO(decrypted))
+
+def append_row_encrypted(row_dict, filename, fieldnames):
+    # decrypt existing file if present
+    try:
+        df = load_csv_encrypted(filename)
+    except FileNotFoundError:
+        df = pd.DataFrame(columns=fieldnames)
+    df = pd.concat([df, pd.DataFrame([row_dict])], ignore_index=True)
+    save_csv_encrypted(df, filename)
 
 # Ensure files exist with proper headers
 # ==========================================
@@ -21,7 +46,7 @@ if "switched" not in st.session_state:
     st.session_state["switched"] = False
 if "show_budget" not in st.session_state:
     st.session_state.show_budget = False
-menu = ["Login", "Signup", "Forgot Password", "About"]
+menu = ["Login", "Signup", "Forgot Password"]
 # ==========================================
 
 # User login
@@ -35,12 +60,11 @@ if choice == "Login":
 
         st.button("Login")
         found = False
-        with open ("accounts.csv", "r") as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row["Username"] == username and row["Password"] == password:
-                    found = True
-                    break
+        
+        for row in load_csv_encrypted("accounts.csv").to_dict(orient="records")
+            if row["Username"] == username and row["Password"] == password:
+                found = True
+                break
             
             if found:
                 st.session_state["logged_in"] = True
@@ -101,7 +125,7 @@ if st.session_state["logged_in"]:
 
     # Sidebar for Navigation
 #---------------------------------------------------------------------------------------------
-    menu = ["View Expenses", "Add Expense","See Receipts" ,"View Budget", "Add Money to Budget", "See Budget Entries", "Split Budget", "About"] 
+    menu = ["View Expenses", "Add Expense","See Receipts" ,"View Budget", "Add Money to Budget", "See Budget Entries", "Split Budget"] 
     choice = st.sidebar.selectbox("App Menu", menu)
 #---------------------------------------------------------------------------------------------
 
@@ -386,13 +410,7 @@ if st.session_state["logged_in"]:
     if st.sidebar.button("Logout"):
         st.session_state["logged_in"] = False
         st.rerun()   
-    # if choice == "About":
-    #     st.markdown(
-    #         "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>About</b> </h3>",
-    #         unsafe_allow_html=True)
-    #     st.write("This is a simple app to toss a coin or roll a dice. It is built using Streamlit and Python." \
-    #     "You can choose your side for the coin toss or roll the dice and see the result. Enjoy!" \
-    #     "\n\nMade with ❤️ by [Shashank Sul ](https://github.com/Shashank-creator7).")
+
 
 # Assign new username
 # ==============================================================================================    
@@ -423,25 +441,8 @@ if choice == "Signup":
                     st.info("Username already exists")
     else:
         st.popover("Logout first to switch choice")
-
-elif choice == "About":
-    st.markdown(
-        "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>About</b> </h3>",
-        unsafe_allow_html=True)
-    st.write("This is a simple app to track your daily personal expenses. Here you can add the budget you wanna spend. You can see the expenses you spent with the modern pie charts and bar statistics. You can also set financial goals and monitor your progress. You can use this app without any cost...Enjoy!" \
-    "\n\nMade with ❤️ by [Shashank Sul ](https://github.com/Shashank-creator7).\
-    \nFor any queries or suggestions, feel free to reach out to me on Instagram.")
-    st.markdown(
-    """
-    <a href="https://www.instagram.com/shashanksul_7/" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="30">
-        shashanksul_7
-    </p>
-    """,
-    unsafe_allow_html=True
-    )
     
-   
+# =================================================================================================
 
 
 # ---------------Code is usable to add another account----------------------------
