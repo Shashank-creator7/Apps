@@ -1,9 +1,18 @@
 import random
 import streamlit as st
 import time
-menu = ["Toss The Coin", "Roll The Dice",  "About"]
+menu = ["Question","Toss The Coin", "Roll The Dice",  "About"]
 
 choice = st.sidebar.selectbox("Menu",menu)
+if choice == "Question":
+    que = st.text_input("Answer 1+1 =")
+    if st.button("Answer"):
+        if que == "2":
+            st.error("You mother fucker don't even know that 1+1 = 11 not 2. You are really useless weight on earth. Get a glass of water deep your mouth into it and die...")
+        elif que == "11":
+            st.success("Correct answer. You will really go ahead in your life. People will try to push you back but don't give up and one day you will be rich than Elon Musk.")
+        else:
+            st.error("Incorrect answer. Try again.")
 if choice == "Toss The Coin":
     st.markdown(
         "<h3 style='font-family:Verdana; color:#4dd0e1; font-size:px;'>🪙 TOSS THE COIN</b> </h3>",
